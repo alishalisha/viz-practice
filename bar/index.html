@@ -34,7 +34,7 @@
     if (error) {
       console.log(error);
     } else {
-      console.log(data);
+      //console.log(data);
       dataset = data;
       generateChart();
     }
@@ -43,17 +43,21 @@
   // Making the bar chart
   var generateChart = function() {
 
-    var width = 920,
+    var width = 620,
         barHeight = 30;
 
-    var maxNumber = d3.max(dataset, function(d) { return d.number; });
+    var maxNumber = d3.max(dataset, function(d) { return parseInt(d.number, 10); });
 
     var x = d3.scale.linear()
-        .domain([0, maxNumber])
+        .domain([0, maxNumber + 2000])
         .range([0, width]);
 
+    var x0 = dataset.map(function(d) {
+      return d.region;
+    })
+
     var y = d3.scale.ordinal()
-            .domain(["Africa", "Asia", "Europe", "North America", "Oceania", "South America", "Unknown"])
+            .domain(x0)
             .rangeBands([0, barHeight * dataset.length]);
 
         //var y = d3.scale.linear().range([height, 0]);
@@ -68,13 +72,13 @@
         .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
 
     bar.append("rect")
-        .attr("width", function(d) { return (d.number/width) * 100 }) // THIS IS SUCH A HACK, HELP.
+        .attr("width", function(d) { return x(d.number)})
         .attr("height", barHeight - 1)
         .attr("fill", "#3c9ac1");
 
     bar.append("text")
         .attr("x", function(d) {
-          return ((d.number/width) * 100) + 5 // THIS IS SUCH A HACK, SOMEONE HELP
+          return parseInt(x(d.number)) + 5
         })
         .attr("y", barHeight / 2)
         .attr("dy", ".25em")

@@ -4,13 +4,30 @@
 .chart {
   border: 1px solid #eee;
   font-family: Arial;
+  padding: 50px 0 30px 120px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: none;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.title {
+  font-weight: bold;
 }
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-  // Getting the data, with a thing that happens if errors occur
+  // Getting the data, with a thing that happens if errors occur lol
   var dataset;
 
   d3.csv("/data/adopt-region.csv", function(error, data) {
@@ -26,26 +43,18 @@
   // Making the bar chart
   var generateChart = function() {
 
-    // d3.select(".chart").selectAll("p")
-    //     .data(dataset)
-    //     .enter()
-    //     .append("p")
-    //     .text(function(d) {
-    //       return d.region;
-    //     });
-
     var width = 920,
-        barHeight = 20;
+        barHeight = 30;
 
     var maxNumber = d3.max(dataset, function(d) { return d.number; });
 
     var x = d3.scale.linear()
-        .domain([0, 6000])
+        .domain([0, maxNumber])
         .range([0, width]);
 
     var y = d3.scale.ordinal()
             .domain(["Africa", "Asia", "Europe", "North America", "Oceania", "South America", "Unknown"])
-            .rangeBands([barHeight, 0]);
+            .rangeBands([0, barHeight * dataset.length]);
 
         //var y = d3.scale.linear().range([height, 0]);
 
@@ -59,21 +68,38 @@
         .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
 
     bar.append("rect")
-        .attr("width", function(d) { return (d.number/width) * 100 })
+        .attr("width", function(d) { return (d.number/width) * 100 }) // THIS IS SUCH A HACK, HELP.
         .attr("height", barHeight - 1)
-        .attr("fill", "gray");
+        .attr("fill", "#3c9ac1");
 
     bar.append("text")
-        //.attr("x", function(d) { return x(d.number) + 3})
         .attr("x", function(d) {
-          return ((d.number/width) * 100) + 5
+          return ((d.number/width) * 100) + 5 // THIS IS SUCH A HACK, SOMEONE HELP
         })
         .attr("y", barHeight / 2)
         .attr("dy", ".25em")
-        .text(function(d) { return d.region; })
-        .style("font-size", "10px");
-  }
+        .text(function(d) { return d.number; })
+        .style("font-size", "11px");
 
+    var yAxis = d3.svg.axis()
+                  .scale(y)
+                  .orient("left");
+
+    // call the y axis
+    chart.append("g")
+         .attr("class", "axis")
+         .attr("transform", "translate(" + -5 + ",0)")
+         .call(yAxis);
+
+    // let's add a title
+    chart.append("g")
+         .append("text")
+         .text("Number of Adoptions by the U.S. by Region")
+         .attr("class", "title")
+         .attr("fill", "gray")
+         .attr("y", "-10")
+         .attr("x", "150");
+  }
 
 </script>
 

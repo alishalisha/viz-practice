@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
+
+body {
+  font-family: Arial;
+}
+
+.wrapper {
+  width: 840px;
+  margin: 50px auto;
+}
+
 .chart {
   border: 1px solid #eee;
-  font-family: Arial;
   padding: 50px 0 30px 120px;
 }
 
 .axis path,
 .axis line {
-    fill: none;
-    stroke: none;
-    shape-rendering: crispEdges;
+  fill: none;
+  stroke: none;
+  shape-rendering: crispEdges;
 }
 
 .axis text {
-    font-family: sans-serif;
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .title {
@@ -24,6 +32,12 @@
   font-size: 12px;
   text-align: center;
   width: 50%;
+}
+
+.source {
+  font-size: 10px;
+  color: gray;
+  margin-top: 10px;
 }
 </style>
 <body>
@@ -94,7 +108,13 @@
     bar.append("rect")
         .attr("width", function(d) { return x(d.number)})
         .attr("height", barHeight - 1)
-        .attr("fill", "#3c9ac1");
+        .attr("fill", function(d) {
+          if (d.number == maxNumber) {
+            return "#fff200"
+          } else {
+            return "#6f96a8"
+          }
+        });
 
     bar.append("text")
         .attr("x", function(d) {
@@ -126,8 +146,10 @@
   }
 
 </script>
-
-<svg class="chart"></svg>
+<div class="wrapper">
+  <svg class="chart"></svg>
+  <div class="source">Source: U.S. Department of Homeland Security</div>
+</div>
 
 </body>
 </html>

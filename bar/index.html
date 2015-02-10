@@ -16,6 +16,11 @@ body {
   padding: 50px 0 30px 120px;
 }
 
+.chart.country {
+  padding-left: 300px;
+  margin-left: -100px; /* this width and margin-ing is such a hack */
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -38,6 +43,7 @@ body {
   font-size: 10px;
   color: gray;
   margin-top: 10px;
+  margin-bottom: 3em;
 }
 </style>
 <body>
@@ -47,6 +53,7 @@ body {
   // Getting the data, with a thing that happens if errors occur lol
   var dataset;
 
+  // The first bar chart
   d3.csv("/data/adopt-region.csv", function(error, data) {
     if (error) {
       console.log(error);
@@ -54,6 +61,17 @@ body {
       dataset = data;
 
       generateChart();
+    }
+  });
+
+  // The second bar chart (This is such a hack, sob, repetitive code)
+  d3.csv("/data/adopt-country.csv", function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      dataset = data;
+
+      generateSecondChart();
     }
   });
 
@@ -93,8 +111,6 @@ body {
     var y = d3.scale.ordinal()
             .domain(x0)
             .rangeBands([0, barHeight * dataset.length]);
-
-        //var y = d3.scale.linear().range([height, 0]);
 
     var chart = d3.select(".chart")
         .attr("width", width)
@@ -145,9 +161,98 @@ body {
          .attr("x", "0");
   }
 
+  // Making the second bar chart
+  var generateSecondChart = function() {
+
+    // get the values as actual numbers, not strings
+    for(var key in dataset) {
+        var value = dataset[key].number;
+        var valueAsNumber = parseInt(value, 10);
+        console.log(valueAsNumber);
+
+        // assign these new int values into the object
+        dataset[key].number = valueAsNumber;
+    }
+
+    console.log(dataset);
+
+    // sort by number of adoptions
+    dataset.sort(function(a, b) {
+      return d3.descending(a.number, b.number)
+    });
+
+    var width = 720,
+        barHeight = 30;
+
+    var maxNumber = d3.max(dataset, function(d) { return parseInt(d.number, 10); });
+
+    var x = d3.scale.linear()
+        .domain([0, maxNumber + 300]) // had to manually add padding here, hmm
+        .range([0, width]);
+
+    var x0 = dataset.map(function(d) {
+      return d.country;
+    })
+
+    var y = d3.scale.ordinal()
+            .domain(x0)
+            .rangeBands([0, barHeight * dataset.length]);
+
+    var chart = d3.select(".chart.country")
+        .attr("width", width)
+        .attr("height", barHeight * dataset.length);
+
+    var bar = chart.selectAll("g")
+        .data(dataset)
+      .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+    bar.append("rect")
+        .attr("width", function(d) { return x(d.number)})
+        .attr("height", barHeight - 1)
+        .attr("fill", function(d) {
+          if (d.number == maxNumber) {
+            return "#fff200"
+          } else {
+            return "#6f96a8"
+          }
+        });
+
+    bar.append("text")
+        .attr("x", function(d) {
+          return parseInt(x(d.number)) + 5
+        })
+        .attr("y", barHeight / 2)
+        .attr("dy", ".25em")
+        .text(function(d) { return d.number; })
+        .style("font-size", "11px");
+
+    var yAxis = d3.svg.axis()
+                  .scale(y)
+                  .orient("left");
+
+    // call the y axis
+    chart.append("g")
+         .attr("class", "axis")
+         .attr("transform", "translate(" + -5 + ",0)")
+         .call(yAxis);
+
+    // let's add a title
+    chart.append("g")
+         .append("text")
+         .text("Immigrant Orphans Adopted by U.S. Citizens by Country of Birth: Fiscal Year 2010")
+         .attr("class", "title")
+         .attr("fill", "#212121")
+         .attr("y", "-10")
+         .attr("x", "0");
+  }
+
 </script>
 <div class="wrapper">
   <svg class="chart"></svg>
+  <div class="source">Source: U.S. Department of Homeland Security</div>
+
+  <svg class="chart country"></svg>
   <div class="source">Source: U.S. Department of Homeland Security</div>
 </div>
 

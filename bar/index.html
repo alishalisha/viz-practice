@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+.chart {
+  border: 1px solid #eee;
+  font-family: Arial;
+}
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+  // Getting the data, with a thing that happens if errors occur
+  var dataset;
+
+  d3.csv("/data/adopt-region.csv", function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(data);
+      dataset = data;
+      generateChart();
+    }
+  });
+
+  // Making the bar chart
+  var generateChart = function() {
+
+    // d3.select(".chart").selectAll("p")
+    //     .data(dataset)
+    //     .enter()
+    //     .append("p")
+    //     .text(function(d) {
+    //       return d.region;
+    //     });
+
+    var width = 920,
+        barHeight = 20;
+
+    var maxNumber = d3.max(dataset, function(d) { return d.number; });
+
+    var x = d3.scale.linear()
+        .domain([0, 6000])
+        .range([0, width]);
+
+    var y = d3.scale.ordinal()
+            .domain(["Africa", "Asia", "Europe", "North America", "Oceania", "South America", "Unknown"])
+            .rangeBands([barHeight, 0]);
+
+        //var y = d3.scale.linear().range([height, 0]);
+
+    var chart = d3.select(".chart")
+        .attr("width", width)
+        .attr("height", barHeight * dataset.length);
+
+    var bar = chart.selectAll("g")
+        .data(dataset)
+      .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+    bar.append("rect")
+        .attr("width", function(d) { return (d.number/width) * 100 })
+        .attr("height", barHeight - 1)
+        .attr("fill", "gray");
+
+    bar.append("text")
+        //.attr("x", function(d) { return x(d.number) + 3})
+        .attr("x", function(d) {
+          return ((d.number/width) * 100) + 5
+        })
+        .attr("y", barHeight / 2)
+        .attr("dy", ".25em")
+        .text(function(d) { return d.region; })
+        .style("font-size", "10px");
+  }
+
+
+</script>
+
+<svg class="chart"></svg>
+
+</body>
+</html>

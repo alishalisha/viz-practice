@@ -30,7 +30,7 @@
   // Getting the data, with a thing that happens if errors occur lol
   var dataset;
 
-  d3.csv("https://raw.githubusercontent.com/alishalisha/viz-practice/master/data/adopt-region.csv", function(error, data) {
+  d3.csv("/data/adopt-region.csv", function(error, data) {
     if (error) {
       console.log(error);
     } else {

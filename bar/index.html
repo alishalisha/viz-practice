@@ -34,8 +34,8 @@
     if (error) {
       console.log(error);
     } else {
-      //console.log(data);
       dataset = data;
+
       generateChart();
     }
   });
@@ -43,13 +43,30 @@
   // Making the bar chart
   var generateChart = function() {
 
-    var width = 620,
+    // get the values as actual numbers, not strings
+    for(var key in dataset) {
+        var value = dataset[key].number;
+        var valueAsNumber = parseInt(value, 10);
+        console.log(valueAsNumber);
+
+        // assign these new int values into the object
+        dataset[key].number = valueAsNumber;
+    }
+
+    console.log(dataset);
+
+    // sort by number of adoptions
+    dataset.sort(function(a, b) {
+      return d3.descending(a.number, b.number)
+    });
+
+    var width = 720,
         barHeight = 30;
 
     var maxNumber = d3.max(dataset, function(d) { return parseInt(d.number, 10); });
 
     var x = d3.scale.linear()
-        .domain([0, maxNumber + 2000])
+        .domain([0, maxNumber + 300]) // had to manually add padding here, hmm
         .range([0, width]);
 
     var x0 = dataset.map(function(d) {

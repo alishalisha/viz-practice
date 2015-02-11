@@ -49,9 +49,11 @@ body {
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-
-  // Getting the data, with a thing that happens if errors occur lol
-  var dataset;
+  var dataset,
+      region,
+      country,
+      selectedChart,
+      chartTitle;
 
   // The first bar chart
   d3.csv("/data/adopt-region.csv", function(error, data) {
@@ -60,23 +62,23 @@ body {
     } else {
       dataset = data;
 
-      generateChart();
+      generateChart(dataset, "region", ".chart", "Immigrant Orphans Adopted by U.S. Citizens by Region\n of Birth: Fiscal Year 2010");
     }
   });
 
-  // The second bar chart (This is such a hack, sob, repetitive code)
+  // The second bar chart
   d3.csv("/data/adopt-country.csv", function(error, data) {
     if (error) {
       console.log(error);
     } else {
       dataset = data;
 
-      generateSecondChart();
+      generateChart(dataset, "country", ".chart.country", "Immigrant Orphans Adopted by U.S. Citizens by Country\n of Birth: Fiscal Year 2010");
     }
   });
 
   // Making the bar chart
-  var generateChart = function() {
+  var generateChart = function(dataset, xField, selectedChart, chartTitle) {
 
     // get the values as actual numbers, not strings
     for(var key in dataset) {
@@ -105,14 +107,14 @@ body {
         .range([0, width]);
 
     var x0 = dataset.map(function(d) {
-      return d.region;
-    })
+      return d[xField]
+    });
 
     var y = d3.scale.ordinal()
             .domain(x0)
             .rangeBands([0, barHeight * dataset.length]);
 
-    var chart = d3.select(".chart")
+    var chart = d3.select(selectedChart)
         .attr("width", width)
         .attr("height", barHeight * dataset.length);
 
@@ -154,93 +156,7 @@ body {
     // let's add a title
     chart.append("g")
          .append("text")
-         .text("Immigrant Orphans Adopted by U.S. Citizens by Gender, Age, and Region and Country\n of Birth: Fiscal Year 2010")
-         .attr("class", "title")
-         .attr("fill", "#212121")
-         .attr("y", "-10")
-         .attr("x", "0");
-  }
-
-  // Making the second bar chart
-  var generateSecondChart = function() {
-
-    // get the values as actual numbers, not strings
-    for(var key in dataset) {
-        var value = dataset[key].number;
-        var valueAsNumber = parseInt(value, 10);
-        console.log(valueAsNumber);
-
-        // assign these new int values into the object
-        dataset[key].number = valueAsNumber;
-    }
-
-    console.log(dataset);
-
-    // sort by number of adoptions
-    dataset.sort(function(a, b) {
-      return d3.descending(a.number, b.number)
-    });
-
-    var width = 720,
-        barHeight = 30;
-
-    var maxNumber = d3.max(dataset, function(d) { return parseInt(d.number, 10); });
-
-    var x = d3.scale.linear()
-        .domain([0, maxNumber + 300]) // had to manually add padding here, hmm
-        .range([0, width]);
-
-    var x0 = dataset.map(function(d) {
-      return d.country;
-    })
-
-    var y = d3.scale.ordinal()
-            .domain(x0)
-            .rangeBands([0, barHeight * dataset.length]);
-
-    var chart = d3.select(".chart.country")
-        .attr("width", width)
-        .attr("height", barHeight * dataset.length);
-
-    var bar = chart.selectAll("g")
-        .data(dataset)
-      .enter().append("g")
-        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-    bar.append("rect")
-        .attr("width", function(d) { return x(d.number)})
-        .attr("height", barHeight - 1)
-        .attr("fill", function(d) {
-          if (d.number == maxNumber) {
-            return "#fff200"
-          } else {
-            return "#6f96a8"
-          }
-        });
-
-    bar.append("text")
-        .attr("x", function(d) {
-          return parseInt(x(d.number)) + 5
-        })
-        .attr("y", barHeight / 2)
-        .attr("dy", ".25em")
-        .text(function(d) { return d3.format("0,000")(d.number); })
-        .style("font-size", "11px");
-
-    var yAxis = d3.svg.axis()
-                  .scale(y)
-                  .orient("left");
-
-    // call the y axis
-    chart.append("g")
-         .attr("class", "axis")
-         .attr("transform", "translate(" + -5 + ",0)")
-         .call(yAxis);
-
-    // let's add a title
-    chart.append("g")
-         .append("text")
-         .text("Immigrant Orphans Adopted by U.S. Citizens by Country of Birth: Fiscal Year 2010")
+         .text(chartTitle)
          .attr("class", "title")
          .attr("fill", "#212121")
          .attr("y", "-10")

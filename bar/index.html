@@ -84,13 +84,10 @@ body {
     for(var key in dataset) {
         var value = dataset[key].number;
         var valueAsNumber = parseInt(value, 10);
-        console.log(valueAsNumber);
 
         // assign these new int values into the object
         dataset[key].number = valueAsNumber;
     }
-
-    console.log(dataset);
 
     // sort by number of adoptions
     dataset.sort(function(a, b) {

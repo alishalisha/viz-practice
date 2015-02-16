@@ -55,6 +55,20 @@ body {
       selectedChart,
       chartTitle;
 
+  // Define something that gets shared for these two
+
+  function handleD3DataLoad() { // put the word "handler" in front of handlers that respond to an event
+    if (error) {
+      console.log(error);
+    } else {
+      dataset = data;
+
+      generateChart(dataset, "region", ".chart", "Immigrant Orphans Adopted by U.S. Citizens by Region\n of Birth: Fiscal Year 2010");
+    }
+  }
+
+  d3.csv("/data/adopt-region.csv", handleD3DataLoad);
+
   // The first bar chart
   d3.csv("/data/adopt-region.csv", function(error, data) {
     if (error) {
